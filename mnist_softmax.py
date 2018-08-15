@@ -23,9 +23,13 @@ from __future__ import print_function
 import argparse
 import sys
 
-from tensorflow.examples.tutorials.mnist import input_data
-
 import tensorflow as tf
+
+# Suppress warnings
+old_v = tf.logging.get_verbosity()
+tf.logging.set_verbosity(tf.logging.ERROR)
+
+from tensorflow.examples.tutorials.mnist import input_data
 
 FLAGS = None
 
