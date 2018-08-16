@@ -32,7 +32,8 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 from tensorflow.examples.tutorials.mnist import input_data
 
 FLAGS = None
-
+def loss(y_, y):
+    return tf.losses.sparse_softmax_cross_entropy(labels=y_, logits=y)
 
 def main(_):
   # Import data
@@ -56,7 +57,7 @@ def main(_):
   #
   # So here we use tf.losses.sparse_softmax_cross_entropy on the raw
   # outputs of 'y', and then average across the batch.
-  cross_entropy = tf.losses.sparse_softmax_cross_entropy(labels=y_, logits=y)
+  cross_entropy = loss(y_, y)#tf.losses.sparse_softmax_cross_entropy(labels=y_, logits=y)
   train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
 
   sess = tf.InteractiveSession()
