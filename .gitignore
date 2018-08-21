@@ -1,3 +1,4 @@
 MNIST_data/
+siamese_tf_mnist/
 __pycache__/
-.idea/workspace.xml
+.idea/
