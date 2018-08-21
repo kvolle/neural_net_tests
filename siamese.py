@@ -2,21 +2,20 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
-import sys
-
+#import system things
+from tensorflow.examples.tutorials.mnist import input_data # for data
 import tensorflow as tf
 import numpy as np
 import os
-import model
+
 # Suppress warnings
-old_v = tf.logging.get_verbosity()
-tf.logging.set_verbosity(tf.logging.ERROR)
+#old_v = tf.logging.get_verbosity()
+#tf.logging.set_verbosity(tf.logging.ERROR)
 
-from tensorflow.examples.tutorials.mnist import input_data
+#import helpers
+import model
 
-FLAGS = None
-
+# prepare data and tf.session
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
 sess = tf.InteractiveSession()
 
@@ -25,7 +24,7 @@ train_step = tf.train.GradientDescentOptimizer(0.1).minimize()
 #saver = tf.train.Saver()
 tf.initialize_all_variables().run()
 
-for step in range(100):#(50000):
+for step in range(2000):#(50000):
     batch_x1, batch_y1 = mnist.train.next_batch(128)
     batch_x2, batch_y2 = mnist.train.next_batch(128)
     #batch_y = (batch_y1 == batch_y2).astype('float')
