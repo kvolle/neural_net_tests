@@ -19,21 +19,21 @@ import model
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
 sess = tf.InteractiveSession()
 
-network = model.network([100, 2])
-train_step = tf.train.GradientDescentOptimizer(0.1).minimize()
+# setup siamese network
+network = model.siamese([1024, 1024, 2])
+train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
 #saver = tf.train.Saver()
 tf.initialize_all_variables().run()
 
 for step in range(2000):#(50000):
     batch_x1, batch_y1 = mnist.train.next_batch(128)
     batch_x2, batch_y2 = mnist.train.next_batch(128)
-    #batch_y = (batch_y1 == batch_y2).astype('float')
-
+    batch_y = (batch_y1 == batch_y2).astype('float')
+    
     _, loss_v = sess.run([train_step, network.loss], feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
-                        network.y1: batch_y1,
-                        network.y2: batch_y2})
+                        network.y_: batch_y1})
 
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
