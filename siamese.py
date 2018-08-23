@@ -14,6 +14,7 @@ import os
 
 #import helpers
 import model
+from siamese_tf_mnist import visualize
 
 # prepare data and tf.session
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
@@ -25,7 +26,11 @@ train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
 #saver = tf.train.Saver()
 tf.initialize_all_variables().run()
 
-for step in range(2000):#(50000):
+testing = network.o1.eval({network.x1: mnist.test.images})
+np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
+np.savetxt("output_prior.csv", testing, delimiter=",")
+writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
+for step in range(2000):
     batch_x1, batch_y1 = mnist.train.next_batch(128)
     batch_x2, batch_y2 = mnist.train.next_batch(128)
     batch_y = (batch_y1 == batch_y2).astype('float')
@@ -41,3 +46,17 @@ for step in range(2000):#(50000):
 
     if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
+
+    if (step + 1) % 1000 == 0:
+        #saver.save(sess, './model')
+        embed = network.o1.eval({network.x1: mnist.test.images})
+        embed.tofile('embed.txt')
+
+np.savetxt("labels.csv", mnist.test.labels, delimiter=",")
+np.savetxt("output.csv", embed, delimiter=",")
+writer.close()
+
+# visualize result
+#x_test = mnist.test.images.reshape([-1, 28, 28])
+#y_test = mnist.test.labels
+#visualize.visualize(embed, x_test, y_test)
