@@ -2,3 +2,7 @@ MNIST_data/
 siamese_tf_mnist/
 __pycache__/
 .idea/
+events.out.tfevents.*.ubuntu-y50
+*.csv
+log/
+
