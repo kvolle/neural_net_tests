@@ -4,5 +4,6 @@ __pycache__/
 .idea/
 events.out.tfevents.*.ubuntu-y50
 *.csv
+*.txt
 log/
 
