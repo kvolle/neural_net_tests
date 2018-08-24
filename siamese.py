@@ -33,12 +33,12 @@ writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
 for step in range(2000):
     batch_x1, batch_y1 = mnist.train.next_batch(128)
     batch_x2, batch_y2 = mnist.train.next_batch(128)
-    batch_y = (batch_y1 == batch_y2).astype('float')
+    batch_y = (batch_y1 == batch_y2)
     
     _, loss_v = sess.run([train_step, network.loss], feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
-                        network.y_: batch_y1})
+                        network.y_: batch_y})
 
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
@@ -57,6 +57,6 @@ np.savetxt("output.csv", embed, delimiter=",")
 writer.close()
 
 # visualize result
-#x_test = mnist.test.images.reshape([-1, 28, 28])
-#y_test = mnist.test.labels
-#visualize.visualize(embed, x_test, y_test)
+x_test = mnist.test.images.reshape([-1, 28, 28])
+y_test = mnist.test.labels
+visualize.visualize(embed, x_test, y_test)
