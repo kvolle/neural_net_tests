@@ -34,6 +34,17 @@ class siamese:
         out = tf.nn.bias_add(tf.matmul(input, w, name=name + '_mul'), b, name=name + '_add')
         return out
 
+    def conv2d_layer(self, input_layer, W):
+        return tf.nn.conv2d(input= input_layer,
+                            filter=W,
+                            strides=[1,1,1,1],
+                            padding='SAME')
+
+    def create_max_pool_layer(self, input):
+        return  tf.nn.max_pool(value=input,
+                               ksize=[1, 2, 2, 1],
+                               strides=[1, 2, 2, 1],
+                               padding='SAME')
     def custom_loss(self):
         margin=5.0
         labels_t = tf.to_float(self.y_)
