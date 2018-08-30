@@ -34,7 +34,7 @@ class siamese:
         out = tf.nn.bias_add(tf.matmul(input, w, name=name + '_mul'), b, name=name + '_add')
         return out
 
-    def conv2d_layer(self, input_layer, W):
+    def conv2d(self, input_layer, W):
         return tf.nn.conv2d(input= input_layer,
                             filter=W,
                             strides=[1,1,1,1],
@@ -45,6 +45,21 @@ class siamese:
                                ksize=[1, 2, 2, 1],
                                strides=[1, 2, 2, 1],
                                padding='SAME')
+    def activation_summary(self, x):
+        tensor_name = x.op.name
+        tf.summary.histogram(tensor_name + '/activations', x)
+        tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zero_fraction(x))
+
+    def conv_layer(self, weights, name):
+        with tf.variable_scope(name) as scope:
+            kernel = tf.Variable(tf.truncated_normal(shape=weights, stddev=0.1, dtype=tf.float32))
+            conv = self.conv2d(images, kernel)
+            bias = tf.Variable(tf.constant(1., shape=[weights[-1]], dtype=tf.float32))
+            preactivation = tf.nn.bias_add(conv, bias)
+            conv_relu = tf.nn.relu(preactivation, name=scope.name)
+            self.activation_summary(conv_relu)
+            h_pool = self.create_max_pool_layer(conv_relu)
+
     def custom_loss(self):
         margin=5.0
         labels_t = tf.to_float(self.y_)
