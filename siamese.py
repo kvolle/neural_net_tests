@@ -8,6 +8,7 @@ import tensorflow as tf
 import numpy as np
 import os
 
+image_size = 28
 # Suppress warnings
 #old_v = tf.logging.get_verbosity()
 #tf.logging.set_verbosity(tf.logging.ERROR)
@@ -25,16 +26,18 @@ network = model.siamese([1024, 1024, 2])
 train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
 #saver = tf.train.Saver()
 tf.initialize_all_variables().run()
-
+"""
 testing = network.o1.eval({network.x1: mnist.test.images})
 np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
+"""
 writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
 for step in range(2000):
-    batch_x1, batch_y1 = mnist.train.next_batch(128)
-    batch_x2, batch_y2 = mnist.train.next_batch(128)
+    long_x1, batch_y1 = mnist.train.next_batch(128)
+    long_x2, batch_y2 = mnist.train.next_batch(128)
     batch_y = (batch_y1 == batch_y2)
-    
+    batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
+    batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
     _, loss_v = sess.run([train_step, network.loss], feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
