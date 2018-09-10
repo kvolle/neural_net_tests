@@ -23,7 +23,8 @@ sess = tf.InteractiveSession()
 
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
-train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
+train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
+
 #saver = tf.train.Saver()
 tf.initialize_all_variables().run()
 """
@@ -47,16 +48,20 @@ for step in range(2000):
         print('Model diverged with loss = NaN')
         quit()
 
+    if step % 600 == 0:
+        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
     if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
 
-    if (step + 1) % 1000 == 0:
+    if (step + 1) % 2000 == 0:
         #saver.save(sess, './model')
-        embed = network.o1.eval({network.x1: mnist.test.images})
+        image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
+        image_vector = image_vector[:1000,:,:,:]
+        embed = network.o1.eval({network.x1: image_vector})
         embed.tofile('embed.txt')
 
-np.savetxt("labels.csv", mnist.test.labels, delimiter=",")
-np.savetxt("output.csv", embed, delimiter=",")
+#np.savetxt("labels.csv", mnist.test.labels, delimiter=",")
+#np.savetxt("output.csv", embed, delimiter=",")
 writer.close()
 
 # visualize result
