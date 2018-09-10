@@ -4,10 +4,8 @@ class siamese:
 
     # Create model
     def __init__(self, sizes):
-        self.keep_prob = 0.5#tf.placeholder(tf.float32, name='dropout_prob')
-        self.num_labels = 10#tf.placeholder(tf.float32, name="num_layers")
-        #self.x1 = tf.placeholder(tf.float32, [None, 784])
-        #self.x2 = tf.placeholder(tf.float32, [None, 784])
+        self.keep_prob = 0.5 #tf.placeholder(tf.float32, name='dropout_prob')
+        self.num_labels = 2
         self.x1 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.x2 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.layers = []
@@ -86,7 +84,7 @@ class siamese:
         return h_pool
 
     def custom_loss(self):
-        margin=5.0
+        margin=1.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
