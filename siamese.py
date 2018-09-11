@@ -6,6 +6,7 @@ from __future__ import print_function
 from tensorflow.examples.tutorials.mnist import input_data # for data
 import tensorflow as tf
 import numpy as np
+import random
 import os
 
 image_size = 28
@@ -16,6 +17,14 @@ image_size = 28
 #import helpers
 import model
 from siamese_tf_mnist import visualize
+from skimage import transform
+
+def noise(images):
+    twisted = images
+    for i in range(len(images)):
+        angle = random.randint(0,360)
+        twisted[i, :, :, :] = transform.rotate(images[i,:,:,:], angle)
+    return twisted
 
 # prepare data and tf.session
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
@@ -39,6 +48,7 @@ for step in range(2000):
     batch_y = (batch_y1 == batch_y2)
     batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
     batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
+    batch_x2 = noise(batch_x2)
     _, loss_v = sess.run([train_step, network.loss], feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
