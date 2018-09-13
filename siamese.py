@@ -42,7 +42,7 @@ np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 """
 writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
-N = 5000
+N = 4000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
