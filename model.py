@@ -17,6 +17,7 @@ class siamese:
         # Create loss
         self.y_ = tf.placeholder(tf.bool, [None])
         self.loss = self.custom_loss()
+        self.acc = self.acc_summary()
 
     def network(self, input_layer, sizes):
         #i = 0
@@ -93,10 +94,22 @@ class siamese:
         same_class_losses = tf.multiply(labels_t, distance2)
         margin_tensor = tf.constant(margin,dtype=tf.float32, name="Margin")
         diff_class_losses = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
-        losses = tf.add(same_class_losses, diff_class_losses)
-        loss = tf.reduce_mean(losses, name="loss")#losses, name="loss")
+        #losses = tf.add(same_class_losses, diff_class_losses)
+        #loss = tf.reduce_sum(losses, name="loss")#losses, name="loss")
+        loss = tf.add(tf.reduce_mean(same_class_losses), tf.reduce_mean(diff_class_losses))
         return loss
+    def acc_summary(self):
+        margin = 1.0
+        labels_t = tf.to_float(self.y_)
+        labels_f = tf.subtract(1.0, labels_t, name="1-yi")
+        distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
+        distance2 = tf.reduce_sum(distance2, 1)
+        distance = tf.sqrt(distance2 + 1e-6, name="Distance")
+        same = tf.multiply(labels_t, distance2)
+        margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
+        diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
 
+        return [tf.summary.scalar("same", tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff))]
 """
     def custom_loss(self):
         margin = 5.0
