@@ -5,7 +5,7 @@ class siamese:
     # Create model
     def __init__(self, sizes):
         self.keep_prob = 0.5 #tf.placeholder(tf.float32, name='dropout_prob')
-        self.num_labels = 2
+        self.num_labels = 10
         self.x1 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.x2 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.layers = []
@@ -15,8 +15,9 @@ class siamese:
             self.o2 = self.network(self.x2,sizes)
 
         # Create loss
-        self.y_ = tf.placeholder(tf.bool, [None])
+        self.y_ = tf.placeholder(tf.float32, [None, 10])
         self.loss = self.custom_loss()
+        self.acc = self.accuracy_summary()
 
     def network(self, input_layer, sizes):
         #i = 0
@@ -84,19 +85,37 @@ class siamese:
         return h_pool
 
     def custom_loss(self):
-        margin=1.0
+        #distance = tf.pow(tf.subtract(self.y_, soft), 2.)
+        #sum_step = tf.sqrt(tf.reduce_sum(distance, 1))
+        #loss = tf.reduce_mean(sum_step, 0)
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y_, logits=self.o1))
+
+        return loss
+    def accuracy_summary(self):
+        soft = tf.nn.softmax(self.o1)
+#        correct = tf.cast(tf.argmax(self.o1, 1) == tf.argmax(self.y_, 1), dtype=tf.float32)
+        distance = tf.pow(tf.subtract(self.y_, soft), 2.)
+        sum_step = tf.sqrt(tf.reduce_sum(distance, 1))
+        correct = tf.reduce_mean(sum_step,0)
+        mean_correct = tf.reduce_mean(correct)
+        return tf.summary.scalar("Correct", mean_correct)
+        #return tf.summary.scalar("Ave2", tf.reduce_mean(soft))
+        """
+        weight=1.5
+        margin=2.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
         distance2 = tf.reduce_sum(distance2, 1)
         distance = tf.sqrt(distance2+1e-6, name="Distance")
-        same_class_losses = tf.multiply(labels_t, distance2)
+        weight_tensor = tf.constant(weight, dtype=tf.float32, name="Weight")
+        same_class_losses = tf.multiply(weight_tensor, tf.multiply(labels_t, distance2))
         margin_tensor = tf.constant(margin,dtype=tf.float32, name="Margin")
         diff_class_losses = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
         losses = tf.add(same_class_losses, diff_class_losses)
         loss = tf.reduce_mean(losses, name="loss")#losses, name="loss")
         return loss
-
+        """
 """
     def custom_loss(self):
         margin = 5.0
