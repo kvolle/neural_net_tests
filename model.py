@@ -90,14 +90,13 @@ class siamese:
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
         distance2 = tf.reduce_sum(distance2, 1)
-        distance = tf.sqrt(distance2+1e-6, name="Distance")
-        same_class_losses = tf.multiply(labels_t, distance2)
-        margin_tensor = tf.constant(margin,dtype=tf.float32, name="Margin")
-        diff_class_losses = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
-        #losses = tf.add(same_class_losses, diff_class_losses)
-        #loss = tf.reduce_sum(losses, name="loss")#losses, name="loss")
-        loss = tf.add(tf.reduce_mean(same_class_losses), tf.reduce_mean(diff_class_losses))
+        distance = tf.sqrt(distance2 + 1e-6, name="Distance")
+        same = tf.multiply(labels_t, distance2)
+        margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
+        diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
+        loss = tf.reduce_mean(same)+tf.reduce_mean(diff)
         return loss
+
     def acc_summary(self):
         margin = 1.0
         labels_t = tf.to_float(self.y_)
@@ -105,9 +104,9 @@ class siamese:
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
         distance2 = tf.reduce_sum(distance2, 1)
         distance = tf.sqrt(distance2 + 1e-6, name="Distance")
-        same = tf.multiply(labels_t, distance2)
+        same = tf.multiply(labels_t, distance)
         margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
-        diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
+        diff = tf.multiply(labels_f, distance)
 
         return [tf.summary.scalar("same", tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff))]
 """
@@ -115,14 +114,14 @@ class siamese:
         margin = 5.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")          # labels_ = !labels;
-        tf.write_file("test.csv",str(tf.reduce_mean(labels_f)),name="Debug")
-        eucd2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
-        eucd2 = tf.reduce_sum(eucd2, 1)
-        eucd = tf.sqrt(eucd2+1e-6, name="eucd")
-        C = tf.constant(margin, name="C")
-        pos = tf.multiply(labels_t, eucd2, name="yi_x_eucd2")
-        neg = tf.multiply(labels_f, tf.pow(tf.maximum(tf.subtract(C, eucd), 0), 2), name="Nyi_x_C-eucd_xx_2")
-        losses = tf.add(pos, neg, name="losses")
-        loss = tf.reduce_mean(losses, name="loss")
+        distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
+        distance2 = tf.reduce_sum(distance2, 1)
+        distance = tf.sqrt(distance2+1e-6, name="Distance")
+        same_class_losses = tf.multiply(labels_t, distance2)
+        margin_tensor = tf.constant(margin,dtype=tf.float32, name="Margin")
+        diff_class_losses = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
+        #losses = tf.add(same_class_losses, diff_class_losses)
+        #loss = tf.reduce_sum(losses, name="loss")#losses, name="loss")
+        loss = tf.add(tf.reduce_mean(same_class_losses), tf.reduce_mean(diff_class_losses))
         return loss
 """
