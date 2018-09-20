@@ -71,7 +71,7 @@ class siamese:
     def activation_summary(self, x):
         tensor_name = x.op.name
         tf.summary.histogram(tensor_name + '/activations', x)
-        tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zero_fraction(x))
+        return tf.summary.scalar(tensor_name + '/sparsity', tf.nn.zero_fraction(x))
 
     def conv_layer(self, input_layer, weights, name):
         with tf.variable_scope(name) as scope:
@@ -108,7 +108,7 @@ class siamese:
         margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
         diff = tf.multiply(labels_f, distance)
 
-        return [tf.summary.scalar("same", tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff))]
+        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff))]
 """
     def custom_loss(self):
         margin = 5.0
