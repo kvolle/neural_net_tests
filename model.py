@@ -5,7 +5,7 @@ class siamese:
     # Create model
     def __init__(self, sizes):
         self.keep_prob = 0.5 #tf.placeholder(tf.float32, name='dropout_prob')
-        self.num_labels = 2
+        self.num_labels = 10
         self.x1 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.x2 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.layers = []
@@ -40,7 +40,8 @@ class siamese:
             local1_drop = tf.nn.dropout(local1, self.keep_prob)
             local2 = tf.nn.bias_add(tf.matmul(local1_drop, W_fc2), b_fc2, name=scope.name)
             #self._activation_summary(local2)
-        return local2
+            final = tf.nn.softmax(local2)
+        return final
     """
         for x in sizes:
             self.layers.append(self.layer_generation(input_layer_local, x, "layer" + str(i)))
@@ -88,13 +89,13 @@ class siamese:
         margin=1.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
-        distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
-        distance2 = tf.reduce_sum(distance2, 1)
-        distance = tf.sqrt(distance2 + 1e-6, name="Distance")
-        same = tf.multiply(labels_t, distance2)
+        dot_prod_half = tf.multiply(self.o1, self.o2,'Prod_half')
+        dot = tf.reduce_sum(dot_prod_half, axis=1, name="Dot_product")
         margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
-        diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
-        loss = tf.reduce_mean(same)+tf.reduce_mean(diff)
+        complement = tf.subtract(margin_tensor, dot, name="Complement")
+        same = tf.multiply(labels_t, complement)
+        diff = tf.multiply(labels_f, dot)
+        loss = 9.0*tf.reduce_mean(same)+tf.reduce_mean(diff)
         return loss
 
     def acc_summary(self):
