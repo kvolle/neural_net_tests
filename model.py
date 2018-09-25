@@ -97,8 +97,17 @@ class siamese:
         distance = tf.pow(tf.subtract(self.y_, soft), 2.)
         sum_step = tf.sqrt(tf.reduce_sum(distance, 1))
         correct = tf.reduce_mean(sum_step,0)
+        answer_guess = tf.argmax(soft, axis=1)
+        answer_truth = tf.argmax(self.y_, axis=1)
+        number_correct = tf.cast(tf.equal(answer_guess, answer_truth), dtype=tf.float64)
+        #dist_test = tf.cast(tf.subtract(answer_truth, answer_guess), dtype=tf.float64)
         mean_correct = tf.reduce_mean(correct)
-        return tf.summary.scalar("Correct", mean_correct)
+        distance = tf.summary.scalar("Distance", mean_correct)
+        count = tf.summary.scalar("Correct",tf.reduce_mean(number_correct))
+        #count = tf.summary.scalar("Wrongness", tf.reduce_mean(dist_test))
+        guess_hist = tf.summary.histogram("Guess",answer_guess)
+        answer_hist = tf.summary.histogram("Ground",answer_truth)
+        return [distance, count, guess_hist, answer_hist]
         #return tf.summary.scalar("Ave2", tf.reduce_mean(soft))
         """
         weight=1.5

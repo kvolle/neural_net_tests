@@ -35,8 +35,8 @@ testing = network.o1.eval({network.x1: mnist.test.images})
 np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 """
-writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
-N = 1250
+writer = tf.summary.FileWriter("log/Kyle/Classification/",sess.graph)
+N = 10000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
@@ -48,7 +48,7 @@ for step in range(N):
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y1})
-    acc2 = sess.run(network.acc, feed_dict={
+    [acc1, acc2, acc3, acc4] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y1})
@@ -59,7 +59,10 @@ for step in range(N):
 #        train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
     if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
+        writer.add_summary(acc1, step)
         writer.add_summary(acc2, step)
+        writer.add_summary(acc3, step)
+        writer.add_summary(acc4, step)
 
     if (step + 1) % N == 0:
         #saver.save(sess, './model')
