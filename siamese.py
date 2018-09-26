@@ -34,15 +34,21 @@ sess = tf.InteractiveSession()
 network = model.siamese([1024, 1024, 2])
 train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
 
-#saver = tf.train.Saver()
+saver = tf.train.Saver()
 tf.initialize_all_variables().run()
 """
 testing = network.o1.eval({network.x1: mnist.test.images})
 np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 """
+if tf.train.checkpoint_exists("./model/conv"):
+    print("Model exists")
+    saver.restore(sess, "./model/conv")
+else:
+    print("Model not found")
+
 writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
-N = 10000
+N = 100
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
