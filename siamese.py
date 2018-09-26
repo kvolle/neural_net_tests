@@ -27,8 +27,10 @@ writer.add_graph(sess.graph)
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
 train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss)
+s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
+s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
-#saver = tf.train.Saver()
+saver = tf.train.Saver(s1, s2)
 tf.initialize_all_variables().run()
 """
 testing = network.o1.eval({network.x1: mnist.test.images})
@@ -36,7 +38,7 @@ np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 """
 writer = tf.summary.FileWriter("log/Kyle/Classification/",sess.graph)
-N = 10000
+N = 100000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
@@ -57,7 +59,7 @@ for step in range(N):
         quit()
 #    if step == 10:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
-    if step % 10 == 0:
+    if step % 100 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
         writer.add_summary(acc1, step)
         writer.add_summary(acc2, step)
@@ -65,7 +67,7 @@ for step in range(N):
         writer.add_summary(acc4, step)
 
     if (step + 1) % N == 0:
-        #saver.save(sess, './model')
+        saver.save(sess, './model/conv')
         image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         image_vector = image_vector[:1000,:,:,:]
         embed = network.o1.eval({network.x1: image_vector})
