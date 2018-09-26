@@ -5,7 +5,7 @@ class siamese:
     # Create model
     def __init__(self, sizes):
         self.keep_prob = 0.5 #tf.placeholder(tf.float32, name='dropout_prob')
-        self.num_labels = 10
+        self.num_labels = 2
         self.x1 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.x2 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
         self.layers = []
@@ -40,7 +40,10 @@ class siamese:
             local1_drop = tf.nn.dropout(local1, self.keep_prob)
             local2 = tf.nn.bias_add(tf.matmul(local1_drop, W_fc2), b_fc2, name=scope.name)
             #self._activation_summary(local2)
-            final = tf.nn.softmax(local2)
+            #final = tf.nn.softmax(local2)
+            two_norm = tf.norm(local2,keep_dims="True")
+            #norm_vector = tf.constant(two_norm, dtype=tf.float32, name="NormVec")
+            final = tf.divide(local2, two_norm, name="Normalized")
         return final
     """
         for x in sizes:
