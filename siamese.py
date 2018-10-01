@@ -26,7 +26,6 @@ writer = tf.summary.FileWriter('board_beginner')  # create writer
 writer.add_graph(sess.graph)
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
-train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss)
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
@@ -37,8 +36,22 @@ testing = network.o1.eval({network.x1: mnist.test.images})
 np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 """
-writer = tf.summary.FileWriter("log/Kyle/Classification/",sess.graph)
-N = 100000
+if tf.train.checkpoint_exists("./model/conv"):
+    print("Model exists")
+    saver.restore(sess, "./model/conv")
+else:
+    print("Model not found")
+
+vars = tf.trainable_variables()
+vars_to_train=[]
+for var in vars:
+    if "siamese/layer1" not in var.name:
+        if "siamese/layer2" not in var.name:
+            vars_to_train.append(var)
+            #print("Name: %s" % (var.name))
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss,var_list=vars_to_train)
+writer = tf.summary.FileWriter("log/Kyle/Classification/Woot/Froze/",sess.graph)
+N = 5000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
@@ -59,7 +72,7 @@ for step in range(N):
         quit()
 #    if step == 10:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
-    if step % 100 == 0:
+    if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
         writer.add_summary(acc1, step)
         writer.add_summary(acc2, step)
@@ -67,7 +80,7 @@ for step in range(N):
         writer.add_summary(acc4, step)
 
     if (step + 1) % N == 0:
-        saver.save(sess, './model/conv')
+        #saver.save(sess, './model/conv')
         image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         image_vector = image_vector[:1000,:,:,:]
         embed = network.o1.eval({network.x1: image_vector})
