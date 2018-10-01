@@ -30,7 +30,7 @@ testing = network.o1.eval({network.x1: mnist.test.images})
 np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
 np.savetxt("output_prior.csv", testing, delimiter=",")
 writer = tf.summary.FileWriter("log/Kyle/",sess.graph)
-for step in range(2000):
+for step in range(5000):
     batch_x1, batch_y1 = mnist.train.next_batch(128)
     batch_x2, batch_y2 = mnist.train.next_batch(128)
     batch_y = (batch_y1 == batch_y2)
@@ -39,7 +39,12 @@ for step in range(2000):
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y})
-
+    [sum1, sum2] = sess.run(network.acc, feed_dict={
+        network.x1: batch_x1,
+        network.x2: batch_x2,
+        network.y_: batch_y})
+    writer.add_summary(sum1, step)
+    writer.add_summary(sum2, step)
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
         quit()

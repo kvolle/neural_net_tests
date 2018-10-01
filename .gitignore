@@ -6,4 +6,4 @@ events.out.tfevents.*.ubuntu-y50
 *.csv
 *.txt
 log/
-
+model/
