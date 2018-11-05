@@ -21,15 +21,17 @@ class siamese:
 
     def network(self, input_layer, sizes):
         #i = 0
+        l1_filters = 8#32
+        l2_filters = 16#64
         input_layer_local = input_layer
-        out_1 = self.conv_layer(input_layer_local, [5,5,1,32],'layer1')
-        out_2 = self.conv_layer(out_1, [5, 5, 32, 64],'layer2')
+        out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
+        out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
         with tf.variable_scope('local1') as scope:
-            reshape = tf.reshape(out_2, [-1, 7 * 7 * 64])
+            reshape = tf.reshape(out_2, [-1, 7 * 7 * l2_filters])
             #W_fc1 = self._create_weights([7 * 7 * 64, 1024])
             #b_fc1 = self._create_bias([1024])
 
-            W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * 64, 1024], stddev=0.1, dtype=tf.float32))
+            W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * l2_filters, 1024], stddev=0.1, dtype=tf.float32))
             b_fc1 = tf.Variable(tf.constant(1., shape=[1024], dtype=tf.float32))
             local1 = tf.nn.relu(tf.matmul(reshape, W_fc1) + b_fc1, name=scope.name)
             #self._activation_summary(local1)
