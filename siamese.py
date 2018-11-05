@@ -32,7 +32,7 @@ sess = tf.InteractiveSession()
 
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
-train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
+train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
@@ -46,7 +46,7 @@ np.savetxt("output_prior.csv", testing, delimiter=",")
 
 if tf.train.checkpoint_exists("./model/conv"):
     print("Model exists")
-    saver.restore(sess, "./model/conv")
+#    saver.restore(sess, "./model/conv")
 else:
     print("Model not found")
 
@@ -60,8 +60,8 @@ for var in vars:
 
 train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss,var_list=vars_to_train)
 
-writer = tf.summary.FileWriter("log/Kyle/Classification/RR/FrozeSmol/",sess.graph)
-N = 5000
+writer = tf.summary.FileWriter("log/Kyle/Classification/RR/FrozeCEL/",sess.graph)
+N = 10000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
