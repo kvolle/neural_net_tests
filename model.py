@@ -21,8 +21,9 @@ class siamese:
 
     def network(self, input_layer, sizes):
         #i = 0
-        l1_filters = 8#32
-        l2_filters = 16#64
+        l1_filters = 5#32
+        l2_filters = 10#64
+        fc1 = 256#1024
         input_layer_local = input_layer
         out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
         out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
@@ -31,13 +32,13 @@ class siamese:
             #W_fc1 = self._create_weights([7 * 7 * 64, 1024])
             #b_fc1 = self._create_bias([1024])
 
-            W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * l2_filters, 1024], stddev=0.1, dtype=tf.float32))
-            b_fc1 = tf.Variable(tf.constant(1., shape=[1024], dtype=tf.float32))
+            W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * l2_filters, fc1], stddev=0.1, dtype=tf.float32))
+            b_fc1 = tf.Variable(tf.constant(1., shape=[fc1], dtype=tf.float32))
             local1 = tf.nn.relu(tf.matmul(reshape, W_fc1) + b_fc1, name=scope.name)
             #self._activation_summary(local1)
 
         with tf.variable_scope('local2_linear') as scope:
-            W_fc2 = tf.Variable(tf.truncated_normal(shape=[1024, self.num_labels], stddev=0.1, dtype=tf.float32))
+            W_fc2 = tf.Variable(tf.truncated_normal(shape=[fc1, self.num_labels], stddev=0.1, dtype=tf.float32))
             b_fc2 = tf.Variable(tf.constant(1., shape=[self.num_labels], dtype=tf.float32))
             local1_drop = tf.nn.dropout(local1, self.keep_prob)
             local2 = tf.nn.bias_add(tf.matmul(local1_drop, W_fc2), b_fc2, name=scope.name)
