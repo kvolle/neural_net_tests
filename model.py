@@ -24,7 +24,10 @@ class siamese:
         l1_filters = 5#32
         l2_filters = 10#64
         fc1 = 256#1024
-        input_layer_local = input_layer
+        mean_tensor = tf.constant(0., dtype=tf.float64)
+        variance_tensor = tf.constant(1., dtype=tf.float64)
+        normalized = tf.nn.batch_normalization(input_layer,mean=mean_tensor, variance=variance_tensor, offset=None, scale=None, variance_epsilon=0.0000001)
+        input_layer_local = normalized
         out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
         out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
         with tf.variable_scope('local1') as scope:
