@@ -78,10 +78,12 @@ for step in range(N):
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
         quit()
+    """
     if step == 100:
-        train_step = tf.train.GradientDescentOptimizer(0.0005).minimize(network.loss)
+        train_step = tf.train.GradientDescentOptimizer(0.000005).minimize(network.loss)
     if step == 500:
-            train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss)
+            train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
+    """
 #    if step % 600 == 0:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
     if step % 10 == 0:
