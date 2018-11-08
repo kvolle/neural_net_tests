@@ -61,7 +61,7 @@ for var in vars:
 train_step = tf.train.GradientDescentOptimizer(0.000001).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/FrozeCEL/",sess.graph)
-N = 5000
+N = 10000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
     long_x2, batch_y2 = mnist.train.next_batch(128)
