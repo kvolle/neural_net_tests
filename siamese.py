@@ -58,7 +58,7 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 
-train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.000001).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/FrozeCEL/",sess.graph)
 N = 5000
