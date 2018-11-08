@@ -32,7 +32,7 @@ sess = tf.InteractiveSession()
 
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
-train_step = tf.train.GradientDescentOptimizer(0.01).minimize(network.loss)
+#train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss)
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
