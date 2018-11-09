@@ -23,10 +23,16 @@ class siamese:
         #i = 0
         l1_filters = 5#32
         l2_filters = 10#64
-        fc1 = 256#1024
+        fc1 = 25#1024
+        """
         mean_tensor = tf.constant(0., dtype=tf.float64)
         variance_tensor = tf.constant(1., dtype=tf.float64)
         normalized = tf.nn.batch_normalization(input_layer,mean=mean_tensor, variance=variance_tensor, offset=None, scale=None, variance_epsilon=0.0000001)
+        """
+        batch_mean1, batch_var1 = tf.nn.moments(self.x1, [0])
+        normalized = tf.nn.batch_normalization(self.x1, mean=batch_mean1, variance=batch_var1,
+                                               offset=None,
+                                               scale=None, variance_epsilon=0.0000001)
         input_layer_local = normalized
         out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
         out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
