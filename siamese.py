@@ -60,7 +60,7 @@ for var in vars:
 
 train_step = tf.train.GradientDescentOptimizer(0.000001).minimize(network.loss,var_list=vars_to_train)
 
-writer = tf.summary.FileWriter("log/Kyle/Classification/RR/FrozeCEL/",sess.graph)
+writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Norm/",sess.graph)
 N = 10000
 for step in range(N):
     long_x1, batch_y1 = mnist.train.next_batch(128)
@@ -88,12 +88,13 @@ for step in range(N):
 #        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
     if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
-        [sum1, sum2] = sess.run(network.acc, feed_dict={
+        [sum1, sum2, sum3] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y})
         writer.add_summary(sum1, step)
         writer.add_summary(sum2, step)
+        writer.add_summary(sum3, step)
 
     if (step + 1) % N == 0:
         #saver.save(sess, './model')

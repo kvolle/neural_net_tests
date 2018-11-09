@@ -119,8 +119,17 @@ class siamese:
         same = tf.multiply(labels_t, distance)
         margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
         diff = tf.multiply(labels_f, distance)
-
-        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff))]
+        """
+        mean_tensor_local = tf.constant(0., dtype=tf.float64)
+        variance_tensor_local = tf.constant(1., dtype=tf.float64)
+        normalized = tf.nn.batch_normalization(self.x1, mean=mean_tensor_local, variance=variance_tensor_local, offset=None,
+                                               scale=None, variance_epsilon=0.0000001)
+        """
+        batch_mean1, batch_var1 = tf.nn.moments(self.x1, [0])
+        normalized = tf.nn.batch_normalization(self.x1, mean=batch_mean1, variance=batch_var1,
+                                               offset=None,
+                                               scale=None, variance_epsilon=0.0000001)
+        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.histogram("input", normalized)]
 """
     def custom_loss(self):
         margin = 5.0
