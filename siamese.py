@@ -58,7 +58,7 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 
-train_step = tf.train.GradientDescentOptimizer(0.000001).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.00001).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Norm/",sess.graph)
 N = 10000
@@ -86,7 +86,7 @@ for step in range(N):
     """
 #    if step % 600 == 0:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
-    if step % 10 == 0:
+    if step % 100 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
         [sum1, sum2, sum3] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
