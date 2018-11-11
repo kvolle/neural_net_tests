@@ -129,7 +129,18 @@ class siamese:
         normalized = tf.nn.batch_normalization(self.x1, mean=batch_mean1, variance=batch_var1,
                                                offset=None,
                                                scale=None, variance_epsilon=0.0000001)
-        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.histogram("input", normalized)]
+        #"""
+        test = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='siamese/layer1')
+        t = test[0]
+        test_image = tf.reshape(t,[1, 5, 25,1])
+
+        """
+        with tf.variable_scope("siamese/layer1"):
+            test = tf.get_variable("Variable:0")
+        tf.print('Test', test.shape)
+        """
+        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.image("pic", test_image)]
+
 """
     def custom_loss(self):
         margin = 5.0
