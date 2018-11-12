@@ -51,14 +51,15 @@ else:
     print("Model not found")
 
 vars = tf.trainable_variables()
-vars_to_train=[]
+vars_to_train=vars#[]
+"""
 for var in vars:
     if "siamese/layer1" not in var.name:
         if "siamese/layer2" not in var.name:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
-
-train_step = tf.train.GradientDescentOptimizer(0.00001).minimize(network.loss,var_list=vars_to_train)
+"""
+train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Norm/",sess.graph)
 N = 10000
