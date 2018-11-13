@@ -63,7 +63,7 @@ for step in range(N):
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y1})
-    [acc1, acc2, acc3, acc4] = sess.run(network.acc, feed_dict={
+    [acc1, acc2, acc3, acc4, acc5] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y1})
@@ -72,13 +72,13 @@ for step in range(N):
         quit()
 #    if step == 10:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
-    if step % 10 == 0:
+    if step % 100 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
         writer.add_summary(acc1, step)
         writer.add_summary(acc2, step)
         writer.add_summary(acc3, step)
         writer.add_summary(acc4, step)
-
+        writer.add_summary(acc5, step)
     if (step + 1) % N == 0:
         #saver.save(sess, './model/conv')
         image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)

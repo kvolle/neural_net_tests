@@ -107,7 +107,12 @@ class siamese:
         #count = tf.summary.scalar("Wrongness", tf.reduce_mean(dist_test))
         guess_hist = tf.summary.histogram("Guess",answer_guess)
         answer_hist = tf.summary.histogram("Ground",answer_truth)
-        return [distance, count, guess_hist, answer_hist]
+        test = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='siamese/layer1')
+        t = test[0]
+        first = t[:, :, 0, 16]
+        test_image = tf.reshape(first, [1, 5, 5, 1])
+
+        return [distance, count, guess_hist, answer_hist, tf.summary.image("pic", test_image)]
         #return tf.summary.scalar("Ave2", tf.reduce_mean(soft))
         """
         weight=1.5
