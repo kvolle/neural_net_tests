@@ -21,19 +21,20 @@ class siamese:
 
     def network(self, input_layer, sizes):
         #i = 0
-        l1_filters = 5#32
-        l2_filters = 10#64
-        fc1 = 25#1024
+        l1_filters = 16#32
+        l2_filters = 32#64
+        fc1 = 1024
         """
         mean_tensor = tf.constant(0., dtype=tf.float64)
         variance_tensor = tf.constant(1., dtype=tf.float64)
         normalized = tf.nn.batch_normalization(input_layer,mean=mean_tensor, variance=variance_tensor, offset=None, scale=None, variance_epsilon=0.0000001)
         """
-        batch_mean1, batch_var1 = tf.nn.moments(self.x1, [0])
-        normalized = tf.nn.batch_normalization(self.x1, mean=batch_mean1, variance=batch_var1,
-                                               offset=None,
-                                               scale=None, variance_epsilon=0.0000001)
-        input_layer_local = normalized
+        #batch_mean1, batch_var1 = tf.nn.moments(input_layer, [0])
+        #normalized = tf.nn.batch_normalization(input_layer, mean=batch_mean1, variance=batch_var1,
+        #                                       offset=None,
+        #                                       scale=None, variance_epsilon=0.0000001)
+        #input_layer_local = normalized
+        input_layer_local = input_layer
         out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
         out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
         with tf.variable_scope('local1') as scope:
