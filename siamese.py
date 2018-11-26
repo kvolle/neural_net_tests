@@ -25,9 +25,21 @@ def noise(images):
         angle = random.randint(0,360)
         twisted[i, :, :, :] = transform.rotate(images[i,:,:,:], angle)
     return twisted
-
+def get_batch(Xdata_binary, Ydata_binary):
+    n = Xdata_binary.shape[0]
+    batch_size = 128
+    batch = np.floor(np.random.rand(batch_size) * n).astype(int)
+    batch_x = Xdata_binary[batch, :]
+    batch_y = Ydata_binary[batch]
+    return[batch_x, batch_y]
 # prepare data and tf.session
+classes_plus_1=3
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
+#Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y[9]==0])
+#Ydata_binary = np.array([y[0:9] for y in mnist.train.labels if y[9]==0])
+Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes_plus_1])
+Ydata_binary = np.array([y for y in mnist.train.labels if y < classes_plus_1])
+
 sess = tf.InteractiveSession()
 
 # setup siamese network
@@ -59,13 +71,13 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 """
-train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss,var_list=vars_to_train)
 
-writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Norm/",sess.graph)
-N = 10000
+writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
+N = 300
 for step in range(N):
-    long_x1, batch_y1 = mnist.train.next_batch(128)
-    long_x2, batch_y2 = mnist.train.next_batch(128)
+    long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
+    long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
     batch_y = (batch_y1 == batch_y2)
     batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
     batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
@@ -79,16 +91,11 @@ for step in range(N):
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
         quit()
-    """
-    if step == 100:
-        train_step = tf.train.GradientDescentOptimizer(0.000005).minimize(network.loss)
-    if step == 500:
-            train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss)
-    """
 #    if step % 600 == 0:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
-    if step % 100 == 0:
+    if step % 10 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
+    if step % 10 == 0:
         [sum1, sum2, sum3] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
@@ -97,9 +104,12 @@ for step in range(N):
         writer.add_summary(sum2, step)
         writer.add_summary(sum3, step)
 
+
     if (step + 1) % N == 0:
         #saver.save(sess, './model')
-        image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
+        iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes_plus_1])
+        image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
+        #image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         image_vector = image_vector[:1000,:,:,:]
         embed = network.o1.eval({network.x1: image_vector})
         embed.tofile('embed.txt')
@@ -109,6 +119,13 @@ for step in range(N):
 writer.close()
 
 # visualize result
-x_test = mnist.test.images.reshape([-1, 28, 28])
-y_test = mnist.test.labels
+#x_test = mnist.test.images.reshape([-1, 28, 28])
+#y_test = mnist.test.labels
+
+x_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes_plus_1])
+y_test = np.array([y for y in mnist.test.labels if y < classes_plus_1])
+x_test = x_long.reshape([len(y_test), image_size, image_size])
+#y_test = np.array([y for y in mnist.test.labels if y<2])
+#x_test = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y<2])
+#x_test = x_test.reshape(len(y_test), image_size, image_size, 1)
 visualize.visualize(embed, x_test, y_test)
