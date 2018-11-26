@@ -131,16 +131,18 @@ class siamese:
                                                offset=None,
                                                scale=None, variance_epsilon=0.0000001)
         #"""
-        test = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='siamese/layer1')
-        t = test[0]
-        test_image = tf.reshape(t,[1, 5, 25,1])
+    #    test = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='siamese/layer1')
+    #    t = test[0]
+    #   test_image = tf.reshape(t,[1, 5, 25,1])
 
         """
         with tf.variable_scope("siamese/layer1"):
             test = tf.get_variable("Variable:0")
         tf.print('Test', test.shape)
         """
-        return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.image("pic", test_image)]
+        #return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.histogram("Class", labels_f)]
+        return [tf.summary.scalar("same", 9.0 * tf.reduce_mean(same)), tf.summary.scalar("True", tf.reduce_mean(labels_t)),
+                tf.summary.scalar("False", tf.reduce_mean(labels_f))]
 
 """
     def custom_loss(self):
