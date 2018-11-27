@@ -35,16 +35,16 @@ class siamese:
         #                                       scale=None, variance_epsilon=0.0000001)
         #input_layer_local = normalized
         input_layer_local = input_layer
-        out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
-        out_2 = self.conv_layer(out_1, [5, 5, l1_filters, l2_filters],'layer2')
+        self.out_1 = self.conv_layer(input_layer_local, [5,5,1,l1_filters],'layer1')
+        out_2 = self.conv_layer(self.out_1, [5, 5, l1_filters, l2_filters],'layer2')
         with tf.variable_scope('local1') as scope:
             reshape = tf.reshape(out_2, [-1, 7 * 7 * l2_filters])
             #W_fc1 = self._create_weights([7 * 7 * 64, 1024])
             #b_fc1 = self._create_bias([1024])
 
-            W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * l2_filters, fc1], stddev=0.1, dtype=tf.float32))
-            b_fc1 = tf.Variable(tf.constant(1., shape=[fc1], dtype=tf.float32))
-            local1 = tf.nn.relu(tf.matmul(reshape, W_fc1) + b_fc1, name=scope.name)
+            self.W_fc1 = tf.Variable(tf.truncated_normal(shape=[7 * 7 * l2_filters, fc1], stddev=0.1, dtype=tf.float32), name="fcw_1")
+            self.b_fc1 = tf.Variable(tf.constant(1., shape=[fc1], dtype=tf.float32))
+            local1 = tf.nn.relu(tf.matmul(reshape, self.W_fc1) + self.b_fc1, name=scope.name)
             #self._activation_summary(local1)
 
         with tf.variable_scope('local2_linear') as scope:
@@ -111,39 +111,11 @@ class siamese:
         return loss
 
     def acc_summary(self):
-        margin = 1.0
-        labels_t = tf.to_float(self.y_)
-        labels_f = tf.subtract(1.0, labels_t, name="1-yi")
-        distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
-        distance2 = tf.reduce_sum(distance2, 1)
-        distance = tf.sqrt(distance2 + 1e-6, name="Distance")
-        same = tf.multiply(labels_t, distance)
-        margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
-        diff = tf.multiply(labels_f, distance)
-        """
-        mean_tensor_local = tf.constant(0., dtype=tf.float64)
-        variance_tensor_local = tf.constant(1., dtype=tf.float64)
-        normalized = tf.nn.batch_normalization(self.x1, mean=mean_tensor_local, variance=variance_tensor_local, offset=None,
-                                               scale=None, variance_epsilon=0.0000001)
-        """
-        batch_mean1, batch_var1 = tf.nn.moments(self.x1, [0])
-        normalized = tf.nn.batch_normalization(self.x1, mean=batch_mean1, variance=batch_var1,
-                                               offset=None,
-                                               scale=None, variance_epsilon=0.0000001)
-        #"""
-    #    test = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='siamese/layer1')
-    #    t = test[0]
-    #   test_image = tf.reshape(t,[1, 5, 25,1])
-
-        """
-        with tf.variable_scope("siamese/layer1"):
-            test = tf.get_variable("Variable:0")
-        tf.print('Test', test.shape)
-        """
-        #return [tf.summary.scalar("same", 9.0*tf.reduce_mean(same)),tf.summary.scalar("diff", tf.reduce_mean(diff)), tf.summary.histogram("Class", labels_f)]
-        return [tf.summary.scalar("same", 9.0 * tf.reduce_mean(same)), tf.summary.scalar("True", tf.reduce_mean(labels_t)),
-                tf.summary.scalar("False", tf.reduce_mean(labels_f))]
-
+        #return [tf.summary.scalar("same", 9.0 * tf.reduce_mean(same)), tf.summary.scalar("True", tf.reduce_mean(labels_t)),
+        #        tf.summary.scalar("False", tf.reduce_mean(labels_f))]
+        #fcw1 = tf.Graph.get_tensor_by_name(tf.get_default_graph(), name="siamese/local1/fcw_1").read_value()
+        fcw1 = self.W_fc1.read_value()
+        return [tf.summary.histogram("fcw", fcw1)]
 """
     def custom_loss(self):
         margin = 5.0
