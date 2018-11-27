@@ -71,10 +71,10 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 """
-train_step = tf.train.GradientDescentOptimizer(0.0001).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 300
+N = 100000
 for step in range(N):
     long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
     long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
@@ -93,16 +93,14 @@ for step in range(N):
         quit()
 #    if step % 600 == 0:
 #        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
-    if step % 10 == 0:
+    if step % 100 == 0:
         print ('step %d: loss %.3f' % (step, loss_v))
-    if step % 10 == 0:
-        [sum1, sum2, sum3] = sess.run(network.acc, feed_dict={
+    if step % 3 == 0:
+        [sum1] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y})
         writer.add_summary(sum1, step)
-        writer.add_summary(sum2, step)
-        writer.add_summary(sum3, step)
 
 
     if (step + 1) % N == 0:
