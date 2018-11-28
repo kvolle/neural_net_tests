@@ -32,13 +32,14 @@ def get_batch(Xdata_binary, Ydata_binary):
     batch_x = Xdata_binary[batch, :]
     batch_y = Ydata_binary[batch]
     return[batch_x, batch_y]
+
 # prepare data and tf.session
-classes_plus_1=3
+classes=5
 mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
 #Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y[9]==0])
 #Ydata_binary = np.array([y[0:9] for y in mnist.train.labels if y[9]==0])
-Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes_plus_1])
-Ydata_binary = np.array([y for y in mnist.train.labels if y < classes_plus_1])
+Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes])
+Ydata_binary = np.array([y for y in mnist.train.labels if y < classes])
 
 sess = tf.InteractiveSession()
 
@@ -71,10 +72,10 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 """
-train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.0002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 100000
+N = 80000#150000
 for step in range(N):
     long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
     long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
@@ -105,7 +106,7 @@ for step in range(N):
 
     if (step + 1) % N == 0:
         #saver.save(sess, './model')
-        iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes_plus_1])
+        iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
         image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
         #image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         image_vector = image_vector[:1000,:,:,:]
@@ -120,8 +121,8 @@ writer.close()
 #x_test = mnist.test.images.reshape([-1, 28, 28])
 #y_test = mnist.test.labels
 
-x_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes_plus_1])
-y_test = np.array([y for y in mnist.test.labels if y < classes_plus_1])
+x_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
+y_test = np.array([y for y in mnist.test.labels if y < classes])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
 #y_test = np.array([y for y in mnist.test.labels if y<2])
 #x_test = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y<2])
