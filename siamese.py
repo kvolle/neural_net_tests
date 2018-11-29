@@ -12,7 +12,7 @@ image_size = 28
 
 #import helpers
 import model
-from siamese_tf_mnist import visualize
+import visualize
 from skimage import transform
 
 def noise(images):
