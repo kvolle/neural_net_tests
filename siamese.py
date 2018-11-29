@@ -10,9 +10,6 @@ import random
 import os
 
 image_size = 28
-# Suppress warnings
-#old_v = tf.logging.get_verbosity()
-#tf.logging.set_verbosity(tf.logging.ERROR)
 
 #import helpers
 import model
@@ -35,7 +32,8 @@ def get_batch(Xdata_binary, Ydata_binary):
 
 # prepare data and tf.session
 classes=5
-mnist = input_data.read_data_sets('MNIST_data', one_hot=False)
+mnist = input_data.read_data_sets('data/fashion', one_hot=False)
+
 #Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y[9]==0])
 #Ydata_binary = np.array([y[0:9] for y in mnist.train.labels if y[9]==0])
 Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes])
@@ -121,7 +119,7 @@ writer.close()
 #x_test = mnist.test.images.reshape([-1, 28, 28])
 #y_test = mnist.test.labels
 
-x_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
+x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
 y_test = np.array([y for y in mnist.test.labels if y < classes])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
 #y_test = np.array([y for y in mnist.test.labels if y<2])
