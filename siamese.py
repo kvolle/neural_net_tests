@@ -43,7 +43,7 @@ network = model.siamese([1024, 1024, 2])
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
-saver = tf.train.Saver(s1, s2)
+saver = tf.train.Saver(s1, s2, max_to_keep=15)
 tf.initialize_all_variables().run()
 
 if tf.train.checkpoint_exists("./model/conv"):
@@ -64,7 +64,7 @@ for var in vars:
 train_step = tf.train.GradientDescentOptimizer(0.0002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 80000#150000
+N = 250000#150000
 for step in range(N):
     long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
     long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
@@ -81,7 +81,11 @@ for step in range(N):
         print('Model diverged with loss = NaN')
         quit()
     if step % 100 == 0:
-        writer.add_summary(tf.summary.scalar(loss_v), step)
+        [loss_sum] = sess.run([network.acc], feed_dict={
+            network.x1: batch_x1,
+            network.x2: batch_x2,
+            network.y_: batch_y})
+        writer.add_summary(loss_sum, step)
     """
     if step % 3 == 0:
         [sum1] = sess.run(network.acc, feed_dict={
@@ -92,16 +96,17 @@ for step in range(N):
     """
 
     if step % 10000 == 0:
-        saver.save(sess, './model', global_step = step, max_to_keep=15)
+        saver.save(sess, './model/mod', global_step = step)
         iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
         y_test = np.array([y for y in mnist.test.labels if y < classes])
         image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
         #image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
+        iv_long = iv_long[:1000,:]
         image_vector = image_vector[:1000,:,:,:]
         y_test = y_test[:1000]
         embed = network.o1.eval({network.x1: image_vector})
         embed.tofile('embed.txt')
-        visualize.save(embed, image_vector, y_test, step)
+        visualize.save(embed, iv_long, y_test, step)
 
 writer.close()
 
