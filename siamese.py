@@ -7,7 +7,6 @@ from tensorflow.examples.tutorials.mnist import input_data # for data
 import tensorflow as tf
 import numpy as np
 import random
-import os
 
 image_size = 28
 
@@ -34,8 +33,6 @@ def get_batch(Xdata_binary, Ydata_binary):
 classes=5
 mnist = input_data.read_data_sets('data/fashion', one_hot=False)
 
-#Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y[9]==0])
-#Ydata_binary = np.array([y[0:9] for y in mnist.train.labels if y[9]==0])
 Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes])
 Ydata_binary = np.array([y for y in mnist.train.labels if y < classes])
 
@@ -43,17 +40,11 @@ sess = tf.InteractiveSession()
 
 # setup siamese network
 network = model.siamese([1024, 1024, 2])
-#train_step = tf.train.GradientDescentOptimizer(0.001).minimize(network.loss)
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
 saver = tf.train.Saver(s1, s2)
 tf.initialize_all_variables().run()
-"""
-testing = network.o1.eval({network.x1: mnist.test.images})
-np.savetxt("labels_prior.csv", mnist.test.labels, delimiter=",")
-np.savetxt("output_prior.csv", testing, delimiter=",")
-"""
 
 if tf.train.checkpoint_exists("./model/conv"):
     print("Model exists")
@@ -80,8 +71,7 @@ for step in range(N):
     batch_y = (batch_y1 == batch_y2)
     batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
     batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
-    #if (step % 10) != 0:
-    #    batch_x2 = noise(batch_x2)
+
     _, loss_v = sess.run([train_step, network.loss], feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
@@ -90,39 +80,35 @@ for step in range(N):
     if np.isnan(loss_v):
         print('Model diverged with loss = NaN')
         quit()
-#    if step % 600 == 0:
-#        train_step = tf.train.GradientDescentOptimizer(0.0001*pow(2,step/600)).minimize(network.loss)
     if step % 100 == 0:
-        print ('step %d: loss %.3f' % (step, loss_v))
+        writer.add_summary(tf.summary.scalar(loss_v), step)
+    """
     if step % 3 == 0:
         [sum1] = sess.run(network.acc, feed_dict={
                         network.x1: batch_x1,
                         network.x2: batch_x2,
                         network.y_: batch_y})
         writer.add_summary(sum1, step)
+    """
 
-
-    if (step + 1) % N == 0:
-        #saver.save(sess, './model')
+    if step % 10000 == 0:
+        saver.save(sess, './model', global_step = step, max_to_keep=15)
         iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
+        y_test = np.array([y for y in mnist.test.labels if y < classes])
         image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
         #image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         image_vector = image_vector[:1000,:,:,:]
+        y_test = y_test[:1000]
         embed = network.o1.eval({network.x1: image_vector})
         embed.tofile('embed.txt')
+        visualize.save(embed, image_vector, y_test, step)
 
-#np.savetxt("labels.csv", mnist.test.labels, delimiter=",")
-#np.savetxt("output.csv", embed, delimiter=",")
 writer.close()
 
 # visualize result
-#x_test = mnist.test.images.reshape([-1, 28, 28])
-#y_test = mnist.test.labels
-
+"""
 x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
 y_test = np.array([y for y in mnist.test.labels if y < classes])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
-#y_test = np.array([y for y in mnist.test.labels if y<2])
-#x_test = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y<2])
-#x_test = x_test.reshape(len(y_test), image_size, image_size, 1)
 visualize.visualize(embed, x_test, y_test)
+"""
