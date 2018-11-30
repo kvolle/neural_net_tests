@@ -61,10 +61,10 @@ for var in vars:
             vars_to_train.append(var)
             #print("Name: %s" % (var.name))
 """
-train_step = tf.train.GradientDescentOptimizer(0.0002).minimize(network.loss,var_list=vars_to_train)
+train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 250000#150000
+N = 500000#150000
 for step in range(N):
     long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
     long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
@@ -106,14 +106,15 @@ for step in range(N):
         y_test = y_test[:1000]
         embed = network.o1.eval({network.x1: image_vector})
         embed.tofile('embed.txt')
-        visualize.save(embed, iv_long, y_test, step)
+        image_vector = image_vector.reshape(1000, image_size, image_size)
+        visualize.save(embed, image_vector, y_test, step)
 
 writer.close()
 
 # visualize result
-"""
+
 x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
 y_test = np.array([y for y in mnist.test.labels if y < classes])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
-visualize.visualize(embed, x_test, y_test)
-"""
+visualize.save(embed, x_test, y_test, N)
+#visualize.visualize(embed, x_test, y_test)
