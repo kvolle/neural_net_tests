@@ -43,12 +43,14 @@ network = model.siamese([1024, 1024, 2])
 s1 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer1')
 s2 = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, 'siamese.layer2')
 
-saver = tf.train.Saver(s1, s2, max_to_keep=15)
+#saver = tf.train.Saver(s1, s2, max_to_keep=15)
+mod = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
+saver = tf.train.Saver(mod, max_to_keep=15)
 tf.initialize_all_variables().run()
 
-if tf.train.checkpoint_exists("./model/conv"):
+if tf.train.checkpoint_exists("./model/Final"):
     print("Model exists")
-#    saver.restore(sess, "./model/conv")
+    saver.restore(sess, './model/Final')# Sloppy and dangerous
 else:
     print("Model not found")
 
