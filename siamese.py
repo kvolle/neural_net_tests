@@ -70,9 +70,9 @@ mod = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES)
 saver = tf.train.Saver(mod, max_to_keep=15)
 tf.initialize_all_variables().run()
 
-if tf.train.checkpoint_exists("./model/Final"):
+if tf.train.checkpoint_exists("./halton_model/Final"):
     print("Model exists")
-    saver.restore(sess, './model/Final')# Sloppy and dangerous
+    saver.restore(sess, './halton_model/Final')# Sloppy and dangerous
 else:
     print("Model not found")
 
@@ -88,7 +88,7 @@ for var in vars:
 train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 15000#150000
+N = 1000#150000
 for step in range(N):
     long_x, batch_y = get_batch(Xdata_sub, Ydata_sub)
 
@@ -117,9 +117,9 @@ for step in range(N):
     """
 
     if step % 1000 == 0:
-        saver.save(sess, './model/mod', global_step = step)
-        iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
-        y_test = np.array([y for y in mnist.test.labels if y < classes])
+        saver.save(sess, './halton_model/mod', global_step = step)
+        iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes + 1])
+        y_test = np.array([y for y in mnist.test.labels if y < classes + 1])
         image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
         #image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
         iv_long = iv_long[:1000,:]
@@ -134,11 +134,11 @@ writer.close()
 
 # visualize result
 
-x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
-y_test = np.array([y for y in mnist.test.labels if y < classes])
+x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y < classes + 1])
+y_test = np.array([y for y in mnist.test.labels if y < classes + 1])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
 visualize.save(embed, x_test, y_test, N)
 #visualize.visualize(embed, x_test, y_test)
 
 #Final save
-saver.save(sess, './model/Final')
+saver.save(sess, './halton_model/Final')

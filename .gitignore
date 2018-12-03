@@ -9,3 +9,4 @@ log/
 model/
 halton_model/
 images/
+*.pyc
