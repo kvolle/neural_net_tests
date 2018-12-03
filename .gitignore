@@ -7,4 +7,5 @@ events.out.tfevents.*.ubuntu-y50
 *.txt
 log/
 model/
+halton_model/
 images/
