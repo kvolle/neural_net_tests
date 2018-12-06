@@ -41,7 +41,7 @@ def custom_loss():
 # prepare data and tf.session
 classes=5
 outputs=2
-N = 1#150000
+N = 101#150000
 mnist = input_data.read_data_sets('data/fashion', one_hot=False)
 
 Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes])
@@ -73,9 +73,6 @@ with Siamese.as_default():
     for u in range(len(untrained)):
         unassigned[u] = untrained[u].name.split('/')
     tf.initialize_all_variables().run(session=sess2)
-    #writer.add_summary(tf.summary.scalar(tf.reduce_mean(Siamese.get_operation_by_name(name="siamese/local1/fcw_1"))), 0)
-    test_weight = network.W_fc1.eval(session=sess2)
-    mean_weight = test_weight.mean()
     # Go through the variables in the halton model
     # Look for two matches in untrained
     for name, value in halton.items():
@@ -96,32 +93,34 @@ with Siamese.as_default():
             sess2.run(assignment_op)
             test = untrained[i].eval(session=sess2)
             a = test.mean()
-    #train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(custom_loss())
+
+    train_step = tf.train.GradientDescentOptimizer(0.002).minimize(network.loss)
     test_weight = network.W_fc1.eval(session=sess2)
     mean_weight = test_weight.mean()
     for step in range(N):
-        for step in range(N):
-            long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
-            long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
-            batch_y = (batch_y1 == batch_y2)
-            batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
-            batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
 
-            #_, loss_v = sess.run([train_step, network.loss], feed_dict={
-            #    network.x1: batch_x1,
-            #    network.x2: batch_x2,
-            #    network.y_: batch_y})
-            if step % 10000 == 0:
-                #saver.save(sess, './model/reload/mod', global_step=step)
-                iv_long = np.array([x for (x, y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
-                y_test = np.array([y for y in mnist.test.labels if y < classes])
-                image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
-                # image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
-                iv_long = iv_long[:1000, :]
-                image_vector = image_vector[:1000, :, :, :]
-                y_test = y_test[:1000]
-                embed = network.o1.eval({network.x1: image_vector}, session=sess2)
-                embed.tofile('embed.txt')
-                image_vector = image_vector.reshape(1000, image_size, image_size)
-                visualize.save(embed, image_vector, y_test, step)
+        long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
+        long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
+        batch_y = (batch_y1 == batch_y2)
+        batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
+        batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
+
+        _, loss_v = sess2.run([train_step, network.loss], feed_dict={
+            network.x1: batch_x1,
+            network.x2: batch_x2,
+            network.y_: batch_y})
+        print(str(step) + ': ' + str(loss_v))
+        if step % 100 == 0:
+            #saver.save(sess, './model/reload/mod', global_step=step)
+            iv_long = np.array([x for (x, y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
+            y_test = np.array([y for y in mnist.test.labels if y < classes])
+            image_vector = iv_long.reshape([len(iv_long), image_size, image_size, 1])
+            # image_vector = mnist.test.images.reshape(len(mnist.test.images), image_size, image_size, 1)
+            iv_long = iv_long[:1000, :]
+            image_vector = image_vector[:1000, :, :, :]
+            y_test = y_test[:1000]
+            embed = network.o1.eval({network.x1: image_vector}, session=sess2)
+            embed.tofile('embed.txt')
+            image_vector = image_vector.reshape(1000, image_size, image_size)
+            visualize.save(embed, image_vector, y_test, step)
     writer.close()
