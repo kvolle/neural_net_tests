@@ -94,7 +94,7 @@ with Siamese.as_default():
             test = untrained[i].eval(session=sess2)
             a = test.mean()
 
-    train_step = tf.train.GradientDescentOptimizer(0.002).minimize(network.loss)
+    train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss)
     test_weight = network.W_fc1.eval(session=sess2)
     mean_weight = test_weight.mean()
     for step in range(N):
