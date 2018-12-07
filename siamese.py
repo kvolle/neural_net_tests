@@ -47,7 +47,7 @@ def haltonize(data, dim):
                 r = r + f*(np.mod(seed, base[y]))
                 seed = np.floor(seed/base[y])
             temp[0, y] = r
-        halton_data[x,:] = temp*100.
+        halton_data[x,:] = temp*10.
     return halton_data
 # prepare data and tf.session
 classes=5
@@ -88,7 +88,7 @@ for var in vars:
 train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 1000#150000
+N = 5000#150000
 for step in range(N):
     long_x, batch_y = get_batch(Xdata_sub, Ydata_sub)
 
