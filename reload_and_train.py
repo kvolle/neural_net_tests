@@ -41,7 +41,7 @@ def custom_loss():
 # prepare data and tf.session
 classes=5
 outputs=2
-N = 101#150000
+N = 80000#150000
 mnist = input_data.read_data_sets('data/fashion', one_hot=False)
 
 Xdata_binary = np.array([x for (x,y) in zip(mnist.train.images,mnist.train.labels) if y < classes])
@@ -109,8 +109,8 @@ with Siamese.as_default():
             network.x1: batch_x1,
             network.x2: batch_x2,
             network.y_: batch_y})
-        print(str(step) + ': ' + str(loss_v))
-        if step % 100 == 0:
+        #print(str(step) + ': ' + str(loss_v))
+        if step % 1000 == 0:
             #saver.save(sess, './model/reload/mod', global_step=step)
             iv_long = np.array([x for (x, y) in zip(mnist.test.images, mnist.test.labels) if y < classes])
             y_test = np.array([y for y in mnist.test.labels if y < classes])
