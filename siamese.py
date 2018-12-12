@@ -50,7 +50,9 @@ tf.initialize_all_variables().run()
 
 if tf.train.checkpoint_exists("./model/Final"):
     print("Model exists")
-    saver.restore(sess, './model/Final')# Sloppy and dangerous
+    response = input("Load saved model? (Y/n)")
+    if (response == 'Y') or (response == 'y'):
+        saver.restore(sess, './model/Final')# Sloppy and dangerous
 else:
     print("Model not found")
 
