@@ -90,6 +90,8 @@ for step in range(N):
             network.x2: batch_x2,
             network.y_: batch_y})
         writer.add_summary(loss_sum, step)
+    if step == 200000:
+        train_step = tf.train.GradientDescentOptimizer(0.0002).minimize(network.loss, var_list=vars_to_train)
     """
     if step % 3 == 0:
         [sum1] = sess.run(network.acc, feed_dict={
