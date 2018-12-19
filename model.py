@@ -4,6 +4,7 @@ class siamese:
 
     # Create model
     def __init__(self, sizes):
+        self.margin = 25.0
         self.keep_prob = 0.5 #tf.placeholder(tf.float32, name='dropout_prob')
         self.num_labels = 2
         self.x1 = tf.placeholder(dtype=tf.float32, shape=[None, 28, 28, 1])
@@ -98,14 +99,13 @@ class siamese:
         return h_pool
 
     def custom_loss(self):
-        margin=15.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
         distance2 = tf.reduce_sum(distance2, 1)
         distance = tf.sqrt(distance2 + 1e-6, name="Distance")
         same = tf.multiply(labels_t, distance2)
-        margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
+        margin_tensor = tf.constant(self.margin, dtype=tf.float32, name="Margin")
         diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
         loss = tf.reduce_mean(same)+tf.reduce_mean(diff)
         return loss
@@ -115,14 +115,13 @@ class siamese:
         ##        tf.summary.scalar("False", tf.reduce_mean(labels_f))]
         ##fcw1 = tf.Graph.get_tensor_by_name(tf.get_default_graph(), name="siamese/local1/fcw_1").read_value()
         #fcw1 = self.W_fc1.read_value()
-        margin = 5.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)
         distance2 = tf.reduce_sum(distance2, 1)
         distance = tf.sqrt(distance2 + 1e-6, name="Distance")
         same = tf.multiply(labels_t, distance2)
-        margin_tensor = tf.constant(margin, dtype=tf.float32, name="Margin")
+        margin_tensor = tf.constant(self.margin, dtype=tf.float32, name="Margin")
         diff = tf.multiply(labels_f, tf.pow(tf.maximum(0.0, tf.subtract(margin_tensor, distance)), 2.))
         return tf.summary.scalar("loss", tf.reduce_mean(same) + tf.reduce_mean(diff))
         #return [tf.summary.histogram("fcw", fcw1)]
