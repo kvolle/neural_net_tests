@@ -21,9 +21,8 @@ def noise(images):
         angle = random.randint(0,360)
         twisted[i, :, :, :] = transform.rotate(images[i,:,:,:], angle)
     return twisted
-def get_batch(Xdata_binary, Ydata_binary):
+def get_batch(Xdata_binary, Ydata_binary, batch_size):
     n = Xdata_binary.shape[0]
-    batch_size = 128
     batch = np.floor(np.random.rand(batch_size) * n).astype(int)
     batch_x = Xdata_binary[batch, :]
     batch_y = Ydata_binary[batch]
@@ -31,8 +30,8 @@ def get_batch(Xdata_binary, Ydata_binary):
 
 def get_paired_batches(xdata, ydata):
     percentage_matching = 50
-    [batch1_x, batch1_y] = get_batch(xdata, ydata)
-    [raw2_x, raw2_y] = get_batch(xdata, ydata)
+    [batch1_x, batch1_y] = get_batch(xdata, ydata, 128)
+    [raw2_x, raw2_y] = get_batch(xdata, ydata, 256)
     max_y = max(raw2_y)
 
     separated =[[] for k in range(max_y+1)]
@@ -103,8 +102,8 @@ train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,va
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
 N = 100000#150000
 for step in range(N):
-    #long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
-    #long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
+    #long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary, 128)
+    #long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary, 128)
     [long_x1, batch_y1, long_x2, batch_y2] = get_paired_batches(Xdata_binary, Ydata_binary)
     batch_y = (batch_y1 == batch_y2)
     batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
