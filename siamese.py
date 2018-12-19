@@ -157,4 +157,5 @@ x_long = np.array([x for (x,y) in zip(mnist.test.images, mnist.test.labels) if y
 y_test = np.array([y for y in mnist.test.labels if y < classes])
 x_test = x_long.reshape([len(y_test), image_size, image_size])
 visualize.save(embed, x_test, y_test, N)
+saver.save(sess,'./model/Final')
 #visualize.visualize(embed, x_test, y_test)
