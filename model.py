@@ -98,7 +98,7 @@ class siamese:
         return h_pool
 
     def custom_loss(self):
-        margin=5.0
+        margin=15.0
         labels_t = tf.to_float(self.y_)
         labels_f = tf.subtract(1.0, labels_t, name="1-yi")
         distance2 = tf.pow(tf.subtract(self.o1, self.o2), 2)

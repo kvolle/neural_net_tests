@@ -29,6 +29,39 @@ def get_batch(Xdata_binary, Ydata_binary):
     batch_y = Ydata_binary[batch]
     return[batch_x, batch_y]
 
+def get_paired_batches(xdata, ydata):
+    percentage_matching = 50
+    [batch1_x, batch1_y] = get_batch(xdata, ydata)
+    [raw2_x, raw2_y] = get_batch(xdata, ydata)
+    max_y = max(raw2_y)
+
+    separated =[[] for k in range(max_y+1)]
+    for (x, y) in zip(raw2_x, raw2_y):
+        separated[y].append(x)
+    batch2_x = []
+    batch2_y = []
+    for (x, y) in zip(batch1_x, batch1_y):
+        if len(batch2_y) != len(batch2_x):
+            print("test")
+        if np.random.random_integers(0, 99, 1) < percentage_matching:
+            # get one from the corresponding separated
+            batch2_x.append(separated[y][0])
+            batch2_y.append(y)
+            if len(separated[y]) > 1:
+                del separated[y][0]
+        else:
+            ind = y
+            while (ind == y):
+                ind = np.random.random_integers(0, max_y)
+            # get one from another section of separated
+            batch2_x.append(separated[ind][0])
+            batch2_y.append(ind)
+            if len(separated[ind]) > 1:
+                del separated[ind][0]
+    batch2_x = np.asarray(batch2_x)
+    batch2_y = np.asarray(batch2_y)
+    return [batch1_x, batch1_y, batch2_x, batch2_y]
+
 # prepare data and tf.session
 classes=5
 mnist = input_data.read_data_sets('data/fashion', one_hot=False)
@@ -68,10 +101,11 @@ for var in vars:
 train_step = tf.train.GradientDescentOptimizer(0.00002).minimize(network.loss,var_list=vars_to_train)
 
 writer = tf.summary.FileWriter("log/Kyle/Classification/RR/Class/",sess.graph)
-N = 500000#150000
+N = 100000#150000
 for step in range(N):
-    long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
-    long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
+    #long_x1, batch_y1 = get_batch(Xdata_binary, Ydata_binary)
+    #long_x2, batch_y2 = get_batch(Xdata_binary, Ydata_binary)
+    [long_x1, batch_y1, long_x2, batch_y2] = get_paired_batches(Xdata_binary, Ydata_binary)
     batch_y = (batch_y1 == batch_y2)
     batch_x1 = long_x1.reshape(len(long_x1), image_size, image_size, 1)
     batch_x2 = long_x2.reshape(len(long_x1), image_size, image_size, 1)
@@ -101,7 +135,7 @@ for step in range(N):
         writer.add_summary(sum1, step)
     """
 
-    if step % 10000 == 0:
+    if step % 2000 == 0:
         saver.save(sess, './model/mod', global_step = step)
         iv_long = np.array([x for (x,y) in zip(mnist.test.images,mnist.test.labels) if y < classes])
         y_test = np.array([y for y in mnist.test.labels if y < classes])
